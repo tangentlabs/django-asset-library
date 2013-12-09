@@ -1,4 +1,4 @@
-oscar-assets
-============
+django-asset-library
+====================
 
-Extracted asset library from Blakey
+Asset library for Django projects
