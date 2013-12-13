@@ -1,0 +1,29 @@
+{% extends "layout.html" %}
+{% load i18n %}
+{% load url from future %}
+
+{% block breadcrumbs %}
+    <ul class="breadcrumb">
+        <li>
+            <a href="{% url 'promotions:home' %}">{% trans "Home" %}</a>
+            <span class="divider">/</span>
+        </li>
+        <li>
+            <a href="{% url 'asset_library:library_list' %}">{% trans "Asset library" %}</a>
+            <span class="divider">/</span>
+        </li>
+        <li class="active">{% block breadcrumb_leaf %}{% endblock %}</li>
+    </ul>
+{% endblock %}
+
+{% block content %}
+    <form action="." method="post">
+        {% csrf_token %}
+        {% include "partials/form_fields.html" with form=form %}
+        {% block delete_question %}<p>{% trans 'Do you want to delete' %} <strong>{{ asset.name }}</strong></p>{% endblock %}
+        <div class="form-actions">
+            <button type="submit" class="btn btn-large btn-danger">{% trans 'Delete' %}</button>
+            {% trans 'or' %} <a href="{% url 'asset_library:library_list' %}">{% trans 'cancel' %}</a>
+        </div>
+    </form>
+{% endblock %}

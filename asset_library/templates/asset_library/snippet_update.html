@@ -1,0 +1,6 @@
+{% extends "asset_library/library_update.html" %}
+{% load url from future %}
+
+{% block preview %}
+    {% include 'partials/form_field.html' with field=form.contents %}
+{% endblock %}

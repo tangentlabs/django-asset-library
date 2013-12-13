@@ -1,0 +1,25 @@
+{% load i18n %}
+<div class="pagination" data-bind="visible: numPages() > 1">
+    <ul>
+        <li data-bind="css: { disabled: page() === 1 }">
+            <a href="#" data-bind="click: decPage">{% trans 'Previous' %}</a>
+        </li>
+    </ul>
+    <ul data-bind="foreach: pageRange">
+        <li>
+            <a href="#" data-bind="text: $data, class: { active: function () { page() === $data } }, click: function () { $root.setPage($data); }"></a>
+        </li>
+    </ul>
+    <ul>
+        <li data-bind="css: { disabled: page() === numPages() }">
+            <a href="#" data-bind="click: incPage">{% trans 'Next' %}</a>
+        </li>
+    </ul>
+</div>
+<label>{% trans 'Show on one page:' %}</label>
+<select class="input-large" data-bind="value: limit">
+    <option value="2">2</option>
+    <option value="20">20</option>
+    <option value="40">40</option>
+    <option value="60">60</option>
+</select>

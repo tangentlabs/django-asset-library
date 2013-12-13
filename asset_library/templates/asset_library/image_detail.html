@@ -1,0 +1,21 @@
+{% extends "asset_library/library_detail.html" %}
+{% load i18n %}
+{% load thumbnail %}
+
+{% block header %}
+    <h1>{% trans 'Image' %} <em>{{ asset.name }}</em></h1>
+{% endblock %}
+
+{% block preview %}
+    {% thumbnail asset.image "400x400" upscale=False as thumb %}
+    <a href="{{ asset.image.url }}"><img src="{{ thumb.url }}"></a>
+    {% endthumbnail %}
+{% endblock %}
+
+{% block properties %}
+    <li><strong>{% trans 'Width' %}:</strong> {{ asset.width }}px</li>
+    <li><strong>{% trans 'Height' %}:</strong> {{ asset.height }}px</li>
+    <li><strong>{% trans 'Filesize' %}:</strong> {{ asset.size|filesizeformat }}</li>
+    <li><strong>{% trans 'Filetype' %}:</strong> {{ asset.extension }}</li>
+    {{ block.super }}
+{% endblock %}

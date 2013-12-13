@@ -1,0 +1,234 @@
+{% extends "layout.html" %}
+{% load i18n %}
+{% load url from future %}
+{% load thumbnail %}
+{% load asset_library_tags %}
+
+{% block title %}{% trans 'Asset library' %} |{{ block.super }}{% endblock %}
+
+{% block breadcrumbs %}
+    <ul class="breadcrumb">
+        <li>
+            <a href="{% url 'promotions:home' %}">{% trans "Home" %}</a>
+            <span class="divider">/</span>
+        </li>
+        <li class="active">{% trans "Asset library" %}</li>
+    </ul>
+{% endblock %}
+
+{% block header %}
+    <div class="pull-right">
+        {% if images_enabled or files_enabled %}
+            <form id="fileupload" class="form-inline pull-left" action="{% url 'asset_library:upload_file' %}" method="POST" data-single-file-uploads="true" enctype="multipart/form-data">
+                {% csrf_token %}
+                <span class="btn btn-primary fileinput-button">
+                    <span>{% trans 'Upload file' %}</span>
+                    <input type="file" id="file" name="file" />
+                </span>
+            </form>
+        {% endif %}
+
+        {% if snippets_enabled %}
+            &nbsp; <a href="{% url "asset_library:snippet_create" %}" class="btn btn-primary">{% trans "New snippet" %}</a>
+        {% endif %}
+    </div>
+
+    <h1>{% trans "Asset library" %}</h1>
+{% endblock %}
+
+{% block content %}
+<div class="row-fluid">
+    <div class="asset-filters span3">
+        <div class="well">
+            <form method="get" action="." class="form-inline asset-library-search">
+                {% include "partials/form_field.html" with field=form.search %}
+            </form>
+        </div>
+
+        <div class="well">
+            <ul class="nav nav-list">
+                <li class="nav-header"><span>{% trans 'By Source' %}</span></li>
+                <li{% if not params.source %} class="active"{% endif %}><a href=".">{% trans 'All assets' %}</a></li>
+                <li{% ifequal params.source 'inbox' %} class="active"{% endifequal %}><a href="{% urlencode_form_data form source='inbox' %}">{% trans 'Inbox' %}</a></li>
+                <li{% ifequal params.source 'personal' %} class="active"{% endifequal %}><a href="{% urlencode_form_data form source='personal' %}">{% trans 'Your assets' %}</a></li>
+                <li{% ifequal params.source 'global' %} class="active"{% endifequal %}><a href="{% urlencode_form_data form source='global' %}">{% trans 'Global Assets' %}</a></li>
+            </ul>
+        </div>
+
+        <div class="well">
+            <ul class="nav nav-list">
+                <li class="nav-header"><span>{% trans 'By Type' %}</span></li>
+                <li{% if not params.asset_type %} class="active"{% endif %}><a href="{% urlencode_form_data form asset_type='' %}">{% trans 'All assets' %}</a></li>
+                {% if images_enabled %}<li>
+                    <li{% ifequal params.asset_type 'images' %} class="active"{% endifequal %}><a href="{% urlencode_form_data form asset_type='images' %}">{% trans 'Image' %}</a></li>
+                {% endif %}
+                {% if files_enabled %}<li>
+                    <li{% ifequal params.asset_type 'files' %} class="active"{% endifequal %}><a href="{% urlencode_form_data form asset_type='files' %}">{% trans 'File (non-image)' %}</a></li>
+                {% endif %}
+                {% if snippets_enabled %}<li>
+                    <li{% ifequal params.asset_type 'snippets' %} class="active"{% endifequal %}><a href="{% urlencode_form_data form asset_type='snippets' %}">{% trans 'Snippet' %}</a></li>
+                {% endif %}
+            </ul>
+        </div>
+
+        {% if tags %}
+            <div class="well">
+                <ul class="nav nav-list">
+                    <li class="nav-header"><span>{% trans 'By Tag' %}</span></li>
+                    <li{% if not params.tag %} class="active"{% endif %}><a href="{% urlencode_form_data form tag='' untagged='' %}">{% trans 'All assets' %}</a></li>
+                    {% for tag in tags %}
+                        <li{% ifequal params.tag tag %} class="active"{% endifequal %}><a href="{% urlencode_form_data form tag=tag.id untagged='' %}">{{ tag.name }} ({{ tag.count }})</a></li>
+                    {% endfor %}
+                {% if untagged_count %}
+                    <li{% if params.untagged %} class="active"{% endif %}><a href="{% urlencode_form_data form untagged='1' tag='' %}">{% trans 'Untagged' %} ({{ untagged_count }})</a></li>
+                {% endif %}
+                </ul>
+            </div>
+        {% endif %}
+    </div>
+    <div class="span9">
+        <div class="well">
+            {% trans 'View:' %}
+            <ul class="inline">
+                <li><a href="{% urlencode_form_data form list_type='grid' %}" title="{% trans 'Grid view' %}"><i class="icon-th icon-large"></i></a></li>
+                <li><a href="{% urlencode_form_data form list_type='table' %}" title="{% trans 'Table view' %}"><i class="icon-list icon-large"></i></a></li>
+            </ul>
+
+        </div>
+        <h3>
+            {% trans 'Showing all' %}
+            {% if not params.asset_type %}
+                {% trans 'assets' %}
+            {% else %}
+                {{ params.asset_type }}
+            {% endif %}
+        </h3>
+        {% ifequal params.list_type "grid" %}
+            {% if assets %}
+                <div class="asset-block">
+                    {% for asset in assets %}
+                        {% ifequal asset.asset_type "ImageAsset" %}
+                            <div class="asset-container asset-type-img">
+                                <div class="asset-item{% if asset.is_global %} asset-global-item{% endif %}">
+                                    <a href="{% if can_edit_global_image or not asset.is_global %}{{ asset.get_update_url }}{% else %}{{ asset.get_absolute_url }}{% endif %}">
+                                    {% thumbnail asset.image "150x150" upscale=False as thumb %}
+                                        <img src="{{ thumb.url }}">
+                                    {% endthumbnail %}
+                                        <div class="caption">
+                                            <span class="caption-name">{{ asset.name }}</span>
+                                            <span class="caption-info">{{ asset.width }} x {{ asset.height }}</span>
+                                        </div>
+                                    </a>
+                                </div>
+                            </div>
+                        {% endifequal %}
+
+                        {% ifequal asset.asset_type "FileAsset" %}
+                            <div class="asset-container asset-type-file">
+                                <div class="asset-item{% if asset.is_global %} asset-global-item{% endif %}">
+                                    <a href="{% if can_edit_global_file or not asset.is_global %}{{ asset.get_update_url }}{% else %}{{ asset.get_absolute_url }}{% endif %}">
+                                        <img src="{{ asset.thumbnail_url }}">
+                                        <div class="caption">
+                                            <span class="caption-name">{{ asset.name }}</span>
+                                        </div>
+                                    </a>
+                                </div>
+                            </div>
+                        {% endifequal %}
+
+                        {% ifequal asset.asset_type "SnippetAsset" %}
+                            <div class="asset-container asset-type-snip">
+                                <div class="asset-item{% if asset.is_global %} asset-global-item{% endif %}">
+                                    <a href="{% if can_edit_global_snippet or not asset.is_global %}{{ asset.get_update_url }}{% else %}{{ asset.get_absolute_url }}{% endif %}">
+                                        <div class="contents">{{ asset.contents }}</div>
+                                        <div class="caption">
+                                            <span class="caption-name">{{ asset.name }}</span>
+                                        </div>
+                                    </a>
+                                </div>
+                            </div>
+                        {% endifequal %}
+
+                        {% ifequal params.source 'inbox' %}
+                            <form action="{{ asset.get_accept_shared_url }}" method="post">
+                                {% csrf_token %}
+                                <button class="btn btn-success">{% trans 'Accept' %}</button>
+                            </form>
+
+                            <form action="{{ asset.get_reject_shared_url }}" method="post">
+                                {% csrf_token %}
+                                <button class="btn btn-danger">{% trans 'Reject' %}</button>
+                            </form>
+                        {% endifequal %}
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p>{% trans 'No assets found' %}</p>
+            {% endif %}
+        {% endifequal %}
+
+        {% ifequal params.list_type "table" %}
+            {% if assets %}
+                <table class="table table-striped table-bordered">
+                    <thead><tr>
+                        <th>{% trans 'Asset name' %}</th>
+                        <th>{% trans 'Type' %}</th>
+                        <th>{% trans 'Last edited' %}</th>
+                    </tr></thead>
+                    <tbody>
+                        {% for asset in assets %}
+                        {% ifnotequal asset.asset_type "Asset" %}
+                        <tr>
+                            {# Asset name Column with link to asset #}
+                            {% ifequal asset.asset_type "ImageAsset" %}
+                            <td>
+                            <a href="{% if can_edit_global_image or not asset.is_global %}{% url 'asset_library:image_update' asset.pk %}{% else %}{{ asset.get_absolute_url }}{% endif %}">
+                                {% if asset.is_global %}<i class="icon-globe"></i> {% endif %}{{ asset.name }}
+                            </a></td>
+                            {% endifequal %}
+                            {% ifequal asset.asset_type "FileAsset" %}
+                            <td>
+                            <a href="{% if can_edit_global_file or not asset.is_global %}{% url 'asset_library:file_update' asset.pk %}{% else %}{{ asset.get_absolute_url }}{% endif %}">
+                                {% if asset.is_global %}<i class="icon-globe"></i> {% endif %}{{ asset.name }}
+                            </a></td>
+                            {% endifequal %}
+                            {% ifequal asset.asset_type "SnippetAsset" %}
+                            <td>
+                            <a href="{% if can_edit_global_snippet or not asset.is_global %}{% url 'asset_library:snippet_update' asset.pk %}{% else %}{{ asset.get_absolute_url }}{% endif %}">
+                                {% if asset.is_global %}<i class="icon-globe"></i> {% endif %}{{ asset.name }}
+                            </a></td>
+                            {% endifequal %}
+
+                            {# Type Column #}
+                            {% ifequal asset.asset_type "ImageAsset" %}
+                            <td>{% trans 'Image' %}</td>
+                            {% endifequal %}
+                            {% ifequal asset.asset_type "FileAsset" %}
+                            <td>{% trans 'File' %} ({{ asset.extension }})</td>
+                            {% endifequal %}
+                            {% ifequal asset.asset_type "SnippetAsset" %}
+                            <td>{% trans 'Snippet' %}</td>
+                            {% endifequal %}
+
+                            {# Last edited Column #}
+                            <td>{{ asset.date_modified }}</td>
+                        </tr>
+                        {% endifnotequal %}
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <p>{% trans 'No assets found' %}</p>
+            {% endif %}
+        {% endifequal %}
+        {% include "partials/pagination.html" %}
+    </div>
+</div>
+{% endblock %}
+
+{% block onbodyload %}
+// Autosubmit file form
+$('#file').change(function () {
+    $('#fileupload').submit();
+});
+{% endblock %}

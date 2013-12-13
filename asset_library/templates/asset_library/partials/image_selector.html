@@ -1,0 +1,177 @@
+{% load staticfiles %}
+{% load url from future %}
+{% load i18n %}
+<div id="imageAssetPopup" class="modal modal-extended fade" tabindex="-1" role="dialog" aria-labelledby="imageAssetPopupLabel" aria-hidden="false">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <!-- ko if: status() == "uploading" -->
+                <div class="modal-body">
+                {% trans 'Uploading image&hellip;' %}
+                </div>
+            <!-- /ko -->
+
+            <!-- ko if: status() === "normal" -->
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    <h3 id="imageAssetPopupLabel">{% trans 'Choose Image' %}</h3>
+                </div>
+                <div class="modal-body">
+                    <div class="row-fluid">
+                        <div class="asset-filters span3">
+                            {# Submitting this form is allowed only via blakey.asset module which also adds CSRF token #}
+                            <form id="imageupload" class="form-inline" method="POST" data-single-file-uploads="true" enctype="multipart/form-data">
+                                <span class="btn btn-primary btn-block fileinput-button">
+                                    <span>{% trans "Upload New Image" %}</span>
+                                    <input type="file" id="file" name="file" accept="image/*" />
+                                    <input type="hidden" name="destination" value="{{ asset_path }}">
+                                </span>
+                            </form>
+
+                            <div class="well">
+                                <ul class="nav nav-list">
+                                    <li class="nav-header"><span>{% trans "By Source" %}</span></li>
+                                    <li data-bind="css: { active: $root.source() == 'global' }"><a href="#" data-bind="click: function() { $root.source('global') } ">{% trans 'Global Images' %}</a></li>
+                                    <li data-bind="css: { active: $root.source() == 'personal' }"><a href="#" data-bind="click: function() { $root.source('personal') } ">{% trans 'Your Images' %}</a></li>
+
+                                    <li class="nav-header"><span>{% trans 'By Tag' %}</span></li>
+                                    <li>
+                                    <select class="input-medium" data-bind="
+                                    options: tags,
+                                    optionsText: 'name',
+                                    optionsValue: 'id',
+                                    optionsCaption: '---',
+                                    value: selectedTag"></select>
+                                    </li>
+
+                                    <li class="nav-header"><span>{% trans "By Image Type" %}</span></li>
+                                    <li>
+                                    <select class="input-medium" data-bind="
+                                    options: extensions,
+                                    optionsCaption: '---',
+                                    value: selectedExtension"></select>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="span9">
+                            <div class="asset-toolbar row-fluid">
+                                <div class="span6">
+                                    <div class="btn-group">
+                                        <button class="btn" data-bind="css: { active: viewStyle() == 'grid' }, click: function(){ viewStyle('grid') }">{% trans "Grid" %}</button>
+                                        <button class="btn" data-bind="css: { active: viewStyle() == 'table' }, click: function(){ viewStyle('table') }">{% trans "Table" %}</button>
+                                    </div>
+
+                                    <div class="search-field">
+                                        <input type="text" placeholder="Search" data-bind="value: search, valueUpdate: 'afterkeydown'" />
+                                    </div>
+                                </div>
+                                <div class="span6">
+                                    <div class="stack-options">
+                                        <label>{% trans 'Sort By' %}:</label>
+                                        <select class="input-large" data-bind="value: sort">
+                                            <option value="name">{% trans 'Name (A-Z)' %}</option>
+                                            <option value="newest_first">{% trans 'Newest First' %}</option>
+                                            <option value="oldest_first">{% trans 'Oldest First' %}</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <hr>
+
+                            <div id="asset-list" class="stack-pane row-fluid">
+                               <div class="alert alert-error fade in" data-bind="visible: errorMessage">
+                                   <a href="#" data-bind="click: function () { errorMessage(null); }" class="close">&times;</a>
+                                   <i class="icon-exclamation-sign"></i>
+                                   <span data-bind="text: errorMessage"></span>
+                               </div>
+
+                                <!-- ko if: viewStyle() == "grid" -->
+                                <div class="asset-block" data-bind="foreach: assets, visible: !isLoading()">
+                                    <div class="asset-container asset-type-img">
+                                        <div class="asset-item">
+                                            <a href="#" data-bind="click: function() { $root.useAsset($data); }">
+                                                <img src="http://placehold.it/200x200" alt="" data-bind="attr: { src: thumbnail }">
+                                                <div class="caption">
+                                                    <span class="caption-name" data-bind="text: name">{% trans "Name" %}</span>
+                                                    <span class="caption-info">
+                                                        <span data-bind="text: width">X</span> x <span data-bind="text: height">Y</span>
+                                                    </span>
+                                                </div>
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- /ko -->
+
+                                <!-- ko if: viewStyle() == "table" -->
+                                <table class="table table-bordered table-striped" data-bind="visible: !isLoading()">
+                                    <thead>
+                                        <tr>
+                                            <th>{% trans "Image Name" %}</th>
+                                            <th>{% trans "Size" %}</th>
+                                            <th>{% trans "Dimensions" %}</th>
+                                            <th>{% trans "Description" %}</th>
+                                            <th>{% trans "Date Added" %}</th>
+                                            <th>{% trans "Last Edited" %}</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody data-bind="foreach: assets">
+                                        <tr>
+                                            <td><a href="#" data-bind="text: name, click: function(){ $root.useAsset($data); }"></a></td>
+                                            <td data-bind="text: $root.formatSize($data.size)"></td>
+                                            <td><span data-bind="text: width">X</span> x <span data-bind="text: height">Y</span></td>
+                                            <td><span data-bind="text: description"></span></td>
+                                            <td data-bind="text: $root.formatDate($data.date_created) "></td>
+                                            <td data-bind="text: $root.formatDate($data.date_modified) "></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                                <!-- /ko -->
+
+                                <p><em data-bind="visible: noAssets">{% trans "No Images" %}</em></p>
+                                <p data-bind="visible: isLoading">{% trans 'LOADING' %}...</p>
+                            </div>
+                        </div>
+                    </div>
+                    {% include 'asset_library/partials/selector_pagination.html' %}
+                    <a href="{% url 'asset_library:library_list' %}">{% trans 'Manage assets' %}</a>
+                <!-- End of content -->
+                </div>
+            <!-- /ko -->
+        </div>
+    </div>
+</div>
+
+<script src="{% static 'blakey/js/image_editor.js' %}" type="text/javascript" charset="utf-8"></script>
+<script type="text/javascript">
+/*
+ * img: image to decorate with toolbar
+ * width, height: initial image dimensions
+ * toolbarPlaceholder: html container (eg div) where toolbar is put
+ * options: options for image operations
+ */
+function initToolbar(img, width, height, toolbarPlaceholder, options) {
+    var imageEditor = new ImageEditor(img, '{{ BLAKEY_ASSET_API_ROOT }}', options);
+    imageEditor.init(width, height);
+    toolbarPlaceholder.html('{% filter escapejs %}
+<div>
+
+<span data-bind="visible: ready() && !changed()">
+    <button class="btn" data-bind="visible: croppable, click: crop" title="{% trans 'Crop' %}"><i class="icon-resize-full"></i></button>
+    <button class="btn" data-bind="click: grayscale" title="{% trans 'Grayscale' %}"><i class="icon-film"></i></button>
+    <button class="btn" data-bind="click: function() {$root.rotate(-90); }" title="{% trans 'Rotate 90 Left' %}"><i class="icon-undo"></i></button>
+    <button class="btn" data-bind="click: function() {$root.rotate(+90); }" title="{% trans 'Rotate 90 Right' %}"><i class="icon-repeat"></i></button>
+</span>
+
+<button class="btn" data-bind="visible: options.enableRemove && ready() && ! changed(), click: remove" title="{% trans 'Remove' %}">
+<i class="icon-remove"></i> {% trans 'Remove' %}</button>
+
+<button class="btn btn-danger" data-bind="visible: changed(), click: cancel">{% trans 'Cancel' %}</button>
+<button class="btn btn-success" data-bind="visible: changed(), click: apply">{% trans 'Apply' %}</button>
+</div>
+{% endfilter %}');
+    ko.applyBindings(imageEditor, toolbarPlaceholder[0]);
+    return imageEditor;
+}
+</script>

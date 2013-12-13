@@ -1,0 +1,28 @@
+{% extends "asset_library/library_update.html" %}
+{% load url from future %}
+{% load thumbnail %}
+{% load i18n %}
+
+{% block preview %}
+    {% thumbnail asset.image "400x400" upscale=False as thumb %}
+    <a href="{{ asset.image.url }}"><img src="{{ thumb.url }}"></a>
+    {% endthumbnail %}
+{% endblock %}
+
+{% block properties %}
+    <li><strong>{% trans 'Width' %}:</strong> {{ asset.width }}px</li>
+    <li><strong>{% trans 'Height' %}:</strong> {{ asset.height }}px</li>
+    <li><strong>{% trans 'Filesize' %}:</strong> {{ asset.size|filesizeformat }}</li>
+    <li><strong>{% trans 'Filetype' %}:</strong> {{ asset.extension }}</li>
+    {{ block.super }}
+{% endblock %}
+
+{% comment %}
+    {# FIXME Implement edit page #}
+    {% block additional_actions %}
+        <div>
+            <p><a href="" class="btn">{% trans "Edit image" %}</a></p>
+            <p>{% trans 'Crop or rotate this image' %}</p>
+        </div>
+    {% endblock %}
+{% endcomment %}

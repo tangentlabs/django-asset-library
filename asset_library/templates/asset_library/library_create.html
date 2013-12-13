@@ -1,0 +1,32 @@
+{% extends "layout.html" %}
+{% load url from future %}
+{% load i18n %}
+
+{% block breadcrumbs %}
+    <ul class="breadcrumb">
+        <li>
+            <a href="{% url 'promotions:home' %}">{% trans "Home" %}</a>
+            <span class="divider">/</span>
+        </li>
+        <li>
+            <a href="{% url 'asset_library:library_list' %}">{% trans "Asset library" %}</a>
+            <span class="divider">/</span>
+        </li>
+        <li class="active">{% block breadcrumb_leaf %}{% endblock %}</li>
+    </ul>
+{% endblock %}
+
+{% block header %}
+    <h1>{% trans 'New Asset' %}</h1>
+{% endblock %}
+
+{% block content %}
+    <form action="." method="post" class="product-new" enctype="multipart/form-data">
+        {% csrf_token %}
+        {% include "partials/form_fields.html" with form=form %}
+        <div class="form-actions">
+            <button type="submit" class="btn btn-large btn-primary">{% trans 'Create' %}</button>
+            {% trans 'or' %} <a href="{% url 'asset_library:library_list' %}">{% trans 'cancel' %}</a>.
+        </div>
+    </form> 
+{% endblock %}

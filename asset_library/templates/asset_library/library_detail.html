@@ -1,0 +1,48 @@
+{% extends "layout.html" %}
+{% load url from future %}
+{% load thumbnail %}
+{% load i18n %}
+{% load static %}
+
+{% block header %}
+    <h1>{{ asset.name }}</h1>
+{% endblock %}
+
+{% block content %}
+    <div class="row-fluid">
+        <div class="asset-filters span4">
+            {% block preview %}{% endblock %}
+            {% block information %}
+                <h3>{% trans 'Information' %}</h3>
+                <ul>
+                    {% block properties %}
+                        <li><strong>{% trans 'Created by' %}:</strong> {{ asset.creator }}</li>
+                        <li><strong>{% trans 'Created date' %}:</strong> {{ asset.date_created }}</li>
+                    {% endblock %}
+                </ul>
+            {% endblock %}
+        </div>
+        <div class="span8">
+            <fieldset>
+                <legend>{% trans 'Asset details' %}</legend>
+                {% block details %}
+                    <p>{% trans 'Name: ' %} {{ asset.name }}</p>
+                    {% if asset.description %}
+                        <p>{% trans 'Usage: ' %}</p>
+                        <p>{{ asset.description }}</p>
+                        <p>{% trans 'usage guidance/restrictions' %}</p>
+                    {% endif %}
+
+                    {% if asset.tags.all %}
+                        <h4>{% trans 'Tags' %}</h4>
+                        <ul id="tag_list">
+                            {% for tag in asset.tags.all %}
+                                <li>{{ tag }}</li>
+                            {% endfor %}
+                        </ul>
+                    {% endif %}
+                {% endblock %}
+            </fieldset>
+        </div>
+    </div>
+{% endblock %}

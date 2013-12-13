@@ -1,0 +1,10 @@
+{% extends "asset_library/library_update.html" %}
+{% load url from future %}
+
+{% block preview %}
+    <img src="{{ asset.thumbnail_url }}">
+{% endblock %}
+
+{% block download %}
+    <a href="{{ asset.url }}" class="btn btn-small">Download File</a>
+{% endblock %}

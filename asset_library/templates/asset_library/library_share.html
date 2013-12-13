@@ -1,0 +1,32 @@
+{% extends "layout.html" %}
+{% load static %}
+{% load url from future %}
+
+{% block title %}{% trans 'Share asset' %} | {% trans 'Asset library' %} |{{ block.super }}
+{% endblock %}
+
+{% block breadcrumbs %}
+    <ul class="breadcrumb">
+        <li>
+            <a href="{% url 'promotions:home' %}">{% trans "Home" %}</a>
+            <span class="divider">/</span>
+        </li>
+        <li>
+            <a href="{% url 'asset_library:library_list' %}">{% trans "Asset library" %}</a>
+            <span class="divider">/</span>
+        </li>
+        <li class="active">{% trans "Share asset?" %}</li>
+    </ul>
+{% endblock %}
+
+{% block header %}
+    <h2>{% trans 'Share asset' %}</h2>
+{% endblock %}
+
+{% block content %}
+    <form action="." method="POST">
+        {% csrf_token %}
+        {% include 'partials/form_field.html' with field=form.shared_with %}
+        <button type="submit" class="btn btn-primary">{% trans 'Share' %}</button>
+    </form>
+{% endblock %}

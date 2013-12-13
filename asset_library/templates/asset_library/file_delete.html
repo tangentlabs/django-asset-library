@@ -1,0 +1,12 @@
+{% extends "asset_library/library_delete.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Delete file asset?" %} | {{ block.super }}{% endblock %}
+
+{% block headertext %}{% trans "Delete file asset?" %}{% endblock %}
+
+{% block breadcrumb_leaf %}{% trans "Delete file asset?" %}{% endblock %}
+
+{% block delete_question %}
+    <p>{% trans 'Do you want to delete file' %} <strong>{{ asset.name }}</strong>?</p>
+{% endblock %}

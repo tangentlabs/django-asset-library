@@ -9,7 +9,7 @@ ASSET_IMAGE_EXTENSIONS = [
     'PPM', 'SPIDER', 'TIF', 'TIFF', 'XBM',
 ]
 
-ASSET_FILE_THUMBNAILS_PATH = 'asset_library/img/file_icons/'
+ASSET_FILE_THUMBNAILS_PATH = 'asset_library/file_icons/'
 ASSET_FILE_EXTENSIONS = [
     'DOC', 'RTF', 'PDF', 'CSV', 'XLS', 'ZIP', 'EPS', 'JPEG',
 ]

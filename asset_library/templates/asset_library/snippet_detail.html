@@ -1,0 +1,16 @@
+{% extends "asset_library/library_detail.html" %}
+{% load i18n %}
+
+{% block header %}
+<h1>{% trans 'Snippet' %} <em>{{ asset.name }}</em></h1>
+{% endblock %}
+
+{% block preview %}
+    {{ asset.contents|linebreaks }}
+{% endblock %}
+
+{% block properties %}
+    <li><strong>{% trans 'Characters' %}:</strong> {{ asset.contents|length }}</li>
+    <li><strong>{% trans 'Words' %}:</strong> {{ asset.contents|wordcount }}</li>
+    {{ block.super }}
+{% endblock %}

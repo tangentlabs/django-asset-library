@@ -1,0 +1,16 @@
+{% extends "asset_library/library_detail.html" %}
+{% load i18n %}
+
+{% block header %}
+    <h1>{% trans 'File' %} <em>{{ asset.name }}</em></h1>
+{% endblock %}
+
+{% block preview %}
+    <a href="{{ asset.url }}"><img src="{{ asset.thumbnail_url }}"></a>
+{% endblock %}
+
+{% block properties %}
+    <li><strong>{% trans 'Filesize' %}:</strong> {{ asset.size|filesizeformat }}</li>
+    <li><strong>{% trans 'Filetype' %}:</strong> {{ asset.extension }}</li>
+    {{ block.super }}
+{% endblock %}

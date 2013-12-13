@@ -1,0 +1,223 @@
+{% extends "layout.html" %}
+{% load url from future %}
+{% load thumbnail %}
+{% load i18n %}
+{% load static %}
+
+{% block title %}{{ asset.name }} | {{ block.super }}{% endblock %}
+
+{% block breadcrumbs %}
+    <ul class="breadcrumb">
+        <li>
+            <a href="{% url 'promotions:home' %}">{% trans "Home" %}</a>
+            <span class="divider">/</span>
+        </li>
+        <li>
+            <a href="{% url 'asset_library:library_list' %}">{% trans "Asset library" %}</a>
+            <span class="divider">/</span>
+        </li>
+        <li class="active">{{ asset.name }}</li>
+    </ul>
+{% endblock %}
+
+{% block styles %}
+    {{ block.super }}
+    <link rel="stylesheet" href="{% static 'blakey/editor/css/ui-lightness/jquery-ui-1.8.20.custom.css' %}">
+{% endblock %}
+
+{% block scripts %}
+    <script src="{% static "oscar/js/jquery/jquery-1.9.1.min.js" %}"></script>
+    <script src="{% static 'blakey/js/lib/jquery-ui.min.js' %}"></script>
+    {{ block.super }}
+{% endblock %}
+
+{% block header %}
+    <h1>{{ asset.name }}</h1>
+{% endblock %}
+
+{% block content %}
+<form action="." method="post">
+    {% csrf_token %}
+    <div class="row-fluid">
+        <div class="asset-filters span4">
+            {% block preview %}{% endblock %}
+            {% block information %}
+                <h3>{% trans 'Information' %}</h3>
+                <ul>
+                    {% block properties %}
+                        <li><strong>{% trans 'Created by' %}:</strong> {{ asset.creator }}</li>
+                        <li><strong>{% trans 'Created date' %}:</strong> {{ asset.date_created }}</li>
+                    {% endblock %}
+                </ul>
+            {% endblock %}
+            {% block download %}{% endblock %}
+        </div>
+        <div class="span8">
+            <fieldset>
+                <legend>{% trans 'Asset details' %}</legend>
+                {% block details %}
+                    {% include 'partials/form_field.html' with field=form.name %}
+                    {% include 'partials/form_field.html' with field=form.description %}
+                    {% if can_edit_globals %}
+                        {% include 'partials/form_field.html' with field=form.is_global %}
+                    {% endif %}
+
+                    <h4>{% trans 'Tags' %}</h4>
+                    <input type="hidden" id="tags" name="tags" value="{{ form.tags.value }}" autocomplete="off">
+                    <ul id="tag_list">
+                        {% for tag in asset.tags.all %}
+                            <li>{{ tag }} <a href="#" data-attrib="{{ tag }}">&times;</a></li>
+                        {% endfor %}
+                    </ul>
+                    <input id="addTag" type="text" placeholder="{% trans 'Insert tags and press enter' %}...">
+
+                {% endblock %}
+            </fieldset>
+        </div>
+    </div>
+
+<div class="form-actions">
+    <div class="pull-right">
+        <button type="submit" class="btn btn-primary">{% trans "Save" %}</button>
+    </div>
+
+    <div class="pull-right">
+        <p><a href="{{ asset.get_delete_url }}" class="btn btn-danger">{% trans "Delete" %}</a></p>
+        <p>{% trans 'Permanently delete this asset' %}</p>
+    </div>
+
+    {% if not asset.is_global %}
+        <div class="pull-right">
+            <p><a href="#sendCopyModal" role="button" class="btn" data-toggle="modal">{% trans "Send a copy" %}</a></p>
+            <p>{% trans 'Send a copy to another user' %}&hellip;</p>
+        </div>
+    {% endif %}
+
+    {% block additional_actions %}{% endblock %}
+</div>
+</form>
+
+{% if not asset.is_global %}
+    {% block send_dialog %}
+    <div id="sendCopyModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="sendCopyModalLabel" aria-hidden="false">
+        <div class="modal-form">
+            <form action="{{ asset.get_share_url }}" method="POST">
+                {% csrf_token %}
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                        <h3 id="sendCopyModalLabel">{% trans 'Send asset' %} {{ asset.name }}</h3>
+                    </div>
+                    <div class="modal-body">
+                        <div class="control-group">
+                            <label class="control-label required" for="id_shared_with_name">{% trans "Send copy to" %} <span>*</span></label>
+                            <div class="controls">
+                                <input type="hidden" id="id_shared_with" name="shared_with">
+                                <input type="text" id="id_shared_with_name" name="shared_with_name" autocomplete="off">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn" data-dismiss="modal" aria-hidden="true">{% trans 'Close' %}</button>
+                        <button type="submit" class="btn btn-primary">{% trans 'Send' %}</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    {% endblock %}
+{% endif %}
+
+{% endblock %}
+
+{% block onbodyload %}
+var handle_removal = function () {
+    remove_tag($(this).attr('data-attrib'));
+    $(this).parent().remove();
+    // don't propagate event
+    return false;
+};
+
+var add_tag = function (input) {
+    /* Split tags, add the new tag and serialize it */
+    var element = $('#tags'),
+        tags = element.val() === '' ? [] : element.val().split(','),
+        new_tags = input === '' ? [] : input.split(','),
+        tag, i, tag_element;
+
+    for (i = 0; i < new_tags.length; i++) {
+        tag = new_tags[i];
+        if ($.inArray(tag, tags) < 0) {
+            tags.push(tag);
+            tag_element = $('<li>' + tag + ' <a href="#" data-attrib="'+ tag +'">&times;</a></li>');
+            tag_element.find('a').on('click', handle_removal);
+            $('#tag_list').append(tag_element);
+        }
+    }
+
+    element.val(tags.join(','));
+};
+
+var remove_tag = function (tag) {
+    var element = $('#tags'),
+        tags = element.val() === '' ? [] : element.val().split(','), 
+        index = $.inArray(tag, tags);
+
+    if (index >= 0) {
+        tags.splice(index, 1);
+    }
+
+    element.val(tags.join(','));
+};
+
+$('#tag_list li a').on('click', handle_removal);
+
+$.getJSON("{{ BLAKEY_ASSET_API_ROOT}}tags/", function (data) {
+    var tags = $.map(data['objects'], function (val) { return val.name; });
+    var suppress_selection = false;
+
+    $("#addTag").autocomplete({
+        minLength: 0,
+        source: tags,
+        select: function(event, ui) {
+            add_tag(ui.item.value);
+            $('#addTag').val('');
+            suppress_selection = true;
+            return false;
+        },
+    }).keydown(function (event) {
+        if (event.keyCode === 13) {
+            event.preventDefault();
+
+            if (suppress_selection) {
+                suppress_selection = false;
+                return;
+            }
+
+            //$(".ui-autocomplete").hide();
+            add_tag($('#addTag').val());
+            $('#addTag').val('');
+        }
+    });
+});
+
+{% if not asset.is_global %}
+$("#id_shared_with_name").autocomplete({
+    minLength: 0,
+    source: function( request, response ) {
+        var url = "{{ BLAKEY_ASSET_API_ROOT }}users/?search=" + request.term;
+        $.getJSON(url, function(data) {
+            response(data['objects']);
+        });
+    },
+    select: function(event, ui) {
+        $("#id_shared_with_name").val(ui.item.name);
+        $("#id_shared_with").val(ui.item.id);
+        return false;
+    },
+}).data("ui-autocomplete")._renderItem = function(ul, item) {
+    ul.zIndex(2048);
+    return $("<li>").append("<a>" + item.name + "</a>").appendTo(ul);
+};
+{% endif %}
+{% endblock %}

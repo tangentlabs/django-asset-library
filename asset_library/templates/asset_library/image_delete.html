@@ -1,0 +1,16 @@
+{% extends "asset_library/library_delete.html" %}
+{% load thumbnail %}
+{% load i18n %}
+
+{% block title %}{% trans "Delete image?" %} | {{ block.super }}{% endblock %}
+
+{% block headertext %}{% trans "Delete image?" %}{% endblock %}
+
+{% block breadcrumb_leaf %}{% trans "Delete image?" %}{% endblock %}
+
+{% block delete_question %}
+    <p>{% trans 'Do you want to delete image' %} <strong>{{ asset.name }}</strong>?</p>
+    {% thumbnail asset.image "400x400" upscale=False as thumb %}
+    <a href="{{ asset.image.url }}"><img src="{{ thumb.url }}"></a>
+    {% endthumbnail %}
+{% endblock %}
