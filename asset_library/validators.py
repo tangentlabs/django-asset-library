@@ -42,19 +42,12 @@ def validate_image_extension(image):
 
 
 def validate_destination_path(destination):
-    """ Destination does not reach outside of MEDIA_ROOT and destination is
-    in format /<asset_type>/<template_id>/<draft_id>/ """
+    """ Destination does not reach outside of MEDIA_ROOT """
 
     if destination.startswith(settings.MEDIA_URL):
         destination = destination[len(settings.MEDIA_URL):]
 
     try:
         safe_join(settings.MEDIA_ROOT, destination)
-    except ValueError:
-        raise ValidationError("Suspicious destination")
-
-    try:
-        asset_type, template_id, draft_id = destination.strip('/').split('/')
-        template_id = int(template_id)
     except ValueError:
         raise ValidationError("Suspicious destination")
