@@ -1,0 +1,6 @@
+# Testing
+django-nose
+spec
+
+# Lint
+flake8
