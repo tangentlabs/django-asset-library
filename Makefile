@@ -6,6 +6,6 @@ install:
 	pip install -r requirements.txt
 
 sandbox: install
-	python sites/sandbox/manage.py reset_db --router=default --noinput
-	python sites/sandbox/manage.py syncdb --noinput
-	python sites/sandbox/manage.py migrate
+	python sandbox/manage.py reset_db --router=default --noinput
+	python sandbox/manage.py syncdb --noinput
+	python sandbox/manage.py migrate

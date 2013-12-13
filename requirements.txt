@@ -2,5 +2,7 @@
 django-nose
 spec
 
-# Lint
+# Development
 flake8
+django-extensions
+South
