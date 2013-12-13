@@ -3,8 +3,8 @@ location = lambda x: os.path.join(os.path.dirname(__file__), x)
 
 ASSET_API_ROOT = '/asset-library/api/v2/'
 ASSET_IMAGES = True
-ASSET_SNIPPETS = False
-ASSET_FILES = False
+ASSET_SNIPPETS = True
+ASSET_FILES = True
 
 ASSET_IMAGE_THUMBNAIL_SIZE = '150x150'
 ASSET_IMAGE_EXTENSIONS = [
