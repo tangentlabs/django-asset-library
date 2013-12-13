@@ -1,4 +1,4 @@
-{% extends "layout.html" %}
+{% extends "asset_library/layout.html" %}
 {% load static %}
 {% load url from future %}
 
@@ -26,7 +26,7 @@
 {% block content %}
     <form action="." method="POST">
         {% csrf_token %}
-        {% include 'partials/form_field.html' with field=form.shared_with %}
+        {{ form.shared_with }}
         <button type="submit" class="btn btn-primary">{% trans 'Share' %}</button>
     </form>
 {% endblock %}

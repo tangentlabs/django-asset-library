@@ -1,4 +1,4 @@
-{% extends "layout.html" %}
+{% extends "asset_library/layout.html" %}
 {% load i18n %}
 {% load url from future %}
 {% load thumbnail %}
@@ -41,7 +41,7 @@
     <div class="asset-filters span3">
         <div class="well">
             <form method="get" action="." class="form-inline asset-library-search">
-                {% include "partials/form_field.html" with field=form.search %}
+                {{ form.search }}
             </form>
         </div>
 
@@ -221,7 +221,10 @@
                 <p>{% trans 'No assets found' %}</p>
             {% endif %}
         {% endifequal %}
+        {% comment %}
+        FIXME
         {% include "partials/pagination.html" %}
+        {% endcomment %}
     </div>
 </div>
 {% endblock %}

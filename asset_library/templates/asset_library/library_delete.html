@@ -1,4 +1,4 @@
-{% extends "layout.html" %}
+{% extends "asset_library/layout.html" %}
 {% load i18n %}
 {% load url from future %}
 
@@ -19,7 +19,7 @@
 {% block content %}
     <form action="." method="post">
         {% csrf_token %}
-        {% include "partials/form_fields.html" with form=form %}
+        {{ form }}
         {% block delete_question %}<p>{% trans 'Do you want to delete' %} <strong>{{ asset.name }}</strong></p>{% endblock %}
         <div class="form-actions">
             <button type="submit" class="btn btn-large btn-danger">{% trans 'Delete' %}</button>

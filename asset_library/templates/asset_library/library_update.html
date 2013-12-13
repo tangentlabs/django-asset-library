@@ -1,4 +1,4 @@
-{% extends "layout.html" %}
+{% extends "asset_library/layout.html" %}
 {% load url from future %}
 {% load thumbnail %}
 {% load i18n %}
@@ -56,10 +56,10 @@
             <fieldset>
                 <legend>{% trans 'Asset details' %}</legend>
                 {% block details %}
-                    {% include 'partials/form_field.html' with field=form.name %}
-                    {% include 'partials/form_field.html' with field=form.description %}
+                    {{ form.name }}
+                    {{ form.description }}
                     {% if can_edit_globals %}
-                        {% include 'partials/form_field.html' with field=form.is_global %}
+                        {{ form.is_global }}
                     {% endif %}
 
                     <h4>{% trans 'Tags' %}</h4>

@@ -1,4 +1,4 @@
-{% extends "layout.html" %}
+{% extends "asset_library/layout.html" %}
 {% load url from future %}
 {% load i18n %}
 
@@ -23,7 +23,7 @@
 {% block content %}
     <form action="." method="post" class="product-new" enctype="multipart/form-data">
         {% csrf_token %}
-        {% include "partials/form_fields.html" with form=form %}
+        {{ form }}
         <div class="form-actions">
             <button type="submit" class="btn btn-large btn-primary">{% trans 'Create' %}</button>
             {% trans 'or' %} <a href="{% url 'asset_library:library_list' %}">{% trans 'cancel' %}</a>.

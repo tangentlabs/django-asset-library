@@ -2,5 +2,5 @@
 {% load url from future %}
 
 {% block preview %}
-    {% include 'partials/form_field.html' with field=form.contents %}
+    {{ form.contents }}
 {% endblock %}
